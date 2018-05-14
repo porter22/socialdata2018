@@ -39,7 +39,7 @@ var svg = d3.select("#top").append("svg")
 
 d3.csv("samlede_socio_data_kbh.csv", function(error, cars) {
 
-  // Extract the list of dimensions and create a scale for each.
+  // Extract the list of dimensions and create a scale  for each.
   x.domain(dimensions = d3.keys(cars[0]).filter(function(d) {
     //dont show name and year columns
     return d != "name" && d != "year" && d != "wkb_geometry" && (y[d] = d3.scale.linear()
