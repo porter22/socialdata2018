@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!--
+The code below is mostly borrowed from https://bl.ocks.org/mbostock/1341021
+
+neigbourhoods with high income are also the ones that have Danes
+
+TODO load json data, connect neigbourhoods to plots
+-->
+
+<meta charset="utf-8">
+<style>
+
+svg {
+  font: 10px sans-serif;
+}
+
+p {
+  font: 20px sans-serif;
+  float: left;
+  margin-left: 50px;
+}
+
+.message {
+  width:60%;
+}
+
+.meta {
+  font: 16px sans-serif;
+  display:block; !important
+}
+
+span {
+  font: 18px sans-serif;
+}
+
+#bottom {
+  float:right;
+  margin-top: -160px;
+}
+
+.background path {
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+}
+
+.foreground path {
+  fill: none;
+  stroke: steelblue;
+}
+
+.brush .extent {
+  fill-opacity: .3;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+h1, h2 {
+  margin-left: 50px;
+}
+
+h2 {
+  /*display: inline-block;*/
+  margin-top: 10px;
+  margin-bottom: 0px;
+}
+
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+
+.nonselected {
+  fill: #4078c0;
+  fill-opacity: 0.2;
+  stroke-width: 0.7;
+  stroke: #4078c0;
+  stroke-opacity: 0.5;
+  /*.style("fill", "#4078c0")
+  .style("fill-opacity", "0.2")
+  .style("stroke-width", "0.7")
+  .style("stroke", "#4078c0")
+  .style("stroke-opacity", "0.5")*/
+}
+
+/*.container {
+  float: left;
+}
+
+.other {
+  display:inline;
+}*/
+
+.selected {
+  fill: orange;
+  fill-opacity: 0.2;
+  stroke-width: 0.7;
+  stroke: #4078c0;
+  stroke-opacity: 0.5;
+}
+
+
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 100px;
+    height: 28px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: white;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.hover_effect {
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+  font-family: Arial;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 0 0 5px 0;
+  color: grey;
+}
+
+.hover_effect:after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  visibility: hidden;
+  background-color: #4078c0;
+  color: #4078c0;
+  -webkit-transition: all .1s ease;
+  transition: all 0.3s ease;
+  -webkit-transform: scaleX(0);
+  -ms-transform: scaleX(0);
+  transform: scaleX(0);
+}
+
+.hover_effect:hover:after {
+  visibility: visible;
+  -webkit-transform: scaleX(1);
+  -ms-transform: scaleX(1);
+  transform: scaleX(1);
+}
+
+
+</style>
+<body>
+<h1>Stories behind Open Copenhagen Data</h1>
+
+
+<p class="hover_effect" id="story1">See Story 1</p>
+<p class="hover_effect" id="story2">See Story 2</p>
+<p class="hover_effect" id="story3">See Story 3</p>
+<p class="hover_effect" id="viz">Find Your Own Stories</p>
+<a class="hover_effect" style="margin-left: 50px; margin-top: 16px;" href="explainer.html">Explainer Page</a>
+<a class="hover_effect" style="margin-left: 50px; margin-top: 16px;" href="https://data.kk.dk/dataset/samlede-socio-data-kbh">Download Data</a>
+<p class="meta"> Please, hold and drag the mouse cursor along each axis to highlight respective districts
+<br/>Note the highlighted districts on the map </p>
+
+
+
+<div class="container" width="100%" id="top"></div>
+<div>
+<h2 class="storyline"></h2>
+<p class = "message"></p>
+
+<p class="meta">
+<br/><br/>All the stats are shown in percentages to the total number of residents in that district (of course, except Number of residents)
+<br/><br/>Prepared by Agzam Idrissov (agzid@dtu.dk) for "Social data analysis and visualization (02806) 2018" course
+</p>
+<br/>
+</div>
+
+<div class="other" width="40%" id="bottom"></div>
+
+</body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="//d3js.org/d3.geo.projection.v0.min.js"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+
+<script type="text/javascript">
+
+//code borrowed from https://stackoverflow.com/questions/7789521/how-to-link-external-javascript-file-onclick-of-button/7789831
+
+var storyone = document.getElementById('story1');
+var storytwo = document.getElementById('story2');
+var storythree = document.getElementById('story3');
+var viz = document.getElementById('viz');
+
+storyone.onclick = function(){
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "graphs_story1.js.";
+    document.getElementsByTagName("head")[0].appendChild(script);
+    return false;
+}
+
+storytwo.onclick = function(){
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "graphs_story2.js.";
+    document.getElementsByTagName("head")[0].appendChild(script);
+    return false;
+}
+
+storythree.onclick = function(){
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "graphs_story3.js.";
+    document.getElementsByTagName("head")[0].appendChild(script);
+    return false;
+}
+
+viz.onclick = function(){
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "graphs_basic.js.";
+    document.getElementsByTagName("head")[0].appendChild(script);
+    return false;
+}
+
+</script>
+
+<script src="graphs_story1.js"></script>
