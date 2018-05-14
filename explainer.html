@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Final project: Explainer Page</title>
+		<script type="text/javascript" src="d3.js"></script>
+		<style type="text/css">
+    p {
+      font-size: 18px;
+    }
+		</style>
+	</head>
+	<body>
+<h1>Explainer Page</h1>
+<p>Social data analysis and visualization (02806) 2018"</p>
+<p>Student: Agzam Idrissov</p>
+<h2>1. Motivation</h2>
+<p>The dataset is taken from Copenhagen Open Data portal. It's a socioeconomic data about Copenhagen residents, which contains information about: income, age, education, origin distributions by districts. It is available in CSV and JSON formats.</p>
+<a href="https://data.kk.dk/dataset/samlede-socio-data-kbh">Source: Socioeconomic data for Copenhagen, Denmark</a>
+<p>I chose this dataset because I am relatively new to the city, and it was interesting to get an overview of it.</p>
+<p>The goal for the user experience is to make users play with visualization and discover their own stories. Hopefully, users that are more familiar with the city might discover even more stories</p>
+<h2>2. Basic stats</h2>
+<p>The dataset was relatively clean. I've removed only several null strings and irrelevant columns.</p>
+<p>The visualisation allowed me to discover interesting stories on-the-go, so I did not have to run any preliminary analysis. Once I've plotted the data onto Parallel Coordinates graph, the patterns (Story 1) and outliers (Stories 2 and 3) were evident visually.</p>
+<h2>3. Genre</h2>
+<p>I consider this visualisation to be a representative of Slide Show genre, according to Segal and Heer's taxonomy. </p>
+<h3>Visual Narrative tools used:</h3>
+<p>
+Highlighting - Feature distinction (to highlight districts both on the map and the graph)
+<br/>Visual Structuring - Consistent Visual Platform (to tell different stories, but have some baseline visualisation).
+</p>
+<h3>Narrative Structure tools used:</h3>
+<p>
+Ordering - Linear (to adjust to slide show format)
+<br/>Interactivity - Hover Highlighting, Filtering, Selection (to highlight districts on the map and the graph), Navigation Buttons (to switch between stories)
+<br/>Messaging - Captions/Headlines, Annotations (to explain stories)
+</p>
+<h2>4. Visualizations</h2>
+<p>For the project I've chosen two interacting visualisations: Parallel Coordinates Plot and Choropleth map. Given the multidimensionality of the data, I've initially chosen the Parallel Coordinates Plot just to explore the dataset.
+<br/>Once I've plotted the dataset, it became surprisingly easy to explore it using only visualisation. After that, the only missing thing was to add a geographical reference, so that the users could see the real world districts.
+<br/>I believe that the Parallel Coordinates Plot was the right tool to quickly explore and visualize the data, while also preserving users ability to uncover own stories. The choropleth map was a rather standart choice, considering the granularity of the dataset. </p>
+<h2>5. Discussion</h2>
+<h3>What went well:</h3>
+<p>Overall, I am satisfied with the project. I was able to discover some interesting (at least to me) stories.</p>
+<h3>What is still missing? What could be improved?</h3>
+<p>This section is going to be much longer :) </p>
+<p>First, I realize that this visualisation is leaning heavily towards the exploratory side, rather than explanatory. There is no consistent narrative, but separate stories.</p>
+<p>Layout could be definitely improved - empty bottom does not look pretty. Perhaps better to shrink Parallel Coordinates Plot and put Map one the same line. Responsiveness could be added as well. </p>
+<p>Interactivity works best only in direction - from Parallel Plot to Map. The other direction needs usability improvement. User can choose a district on a map and it will color orange the according line at the Parallel Coordinates Plot, but only outliers are visible. Need to play with Z-index/opacity/colors.</p>
+<p>Bugs when trying to use several brushes</p>
+<h2>6. Contribution</h2>
+<p>The project was implemented solely by me.</p>
+	</body>
+</html>
