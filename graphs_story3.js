@@ -121,7 +121,7 @@ d3.csv("samlede_socio_data_kbh.csv", function(error, cars) {
   demoDistricts.push("Egmonts");//for story 3 purposes
 
   d3.select("p.message")
-  .text("This huge proportion of middle income earners can be explained by pensions.");
+  .text("This huge proportion of middle income earners can be explained by pensions. Interestingly, Nørre Alles is neighbouring with Egmonts - the youngest district.");
 
   /*d3.select("p.messagethree")
   .text("Interestingly, Nørre Alles is neighbouring with Egmonts - the youngest district");*/
@@ -130,7 +130,7 @@ d3.csv("samlede_socio_data_kbh.csv", function(error, cars) {
 
 });
 
-d3.json("http://wfs-kbhkort.kk.dk/k101/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=k101:samlede_socio_data_kbh&outputFormat=json&SRSNAME=EPSG:4326&maxfeatures=1000", function(error, json) {
+d3.json("map.json", function(error, json) {
   //Bind data and create one path per GeoJSON feature
   //console.log(json.features);
 

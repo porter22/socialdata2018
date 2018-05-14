@@ -124,7 +124,7 @@ d3.csv("samlede_socio_data_kbh.csv", function(error, cars) {
 
 });
 
-d3.json("http://wfs-kbhkort.kk.dk/k101/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=k101:samlede_socio_data_kbh&outputFormat=json&SRSNAME=EPSG:4326&maxfeatures=1000", function(error, json) {
+d3.json("map.json", function(error, json) {
   //Bind data and create one path per GeoJSON feature
   //console.log(json.features);
 
