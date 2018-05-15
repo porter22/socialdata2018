@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Assignment 2</title>
+		<script type="text/javascript" src="d3.js"></script>
+		<style type="text/css">
+
+		.brushed {
+            fill: #ff3399;
+            stroke: #8e1b54;
+            opacity: 1.0;
+        }
+
+    .non_brushed {
+        fill: #404040;
+        opacity: 0.5;
+    }
+
+		p {
+		  font: 20px sans-serif;
+		}
+
+		</style>
+	</head>
+	<body>
+		<h2>Assignment 2 - Social Data Analysis 2018 </h2>
+		<p>Student: Agzam Idrissov </p>
+
+
+		<script type="text/javascript">
+
+		//code based on exercises from Interactive Data Visualization for the Web book by Scott Murray
+
+		//Width and height
+		var w = 800;
+		var h = 600;
+		var padding = 20;
+
+		//color scale source: http://bl.ocks.org/emmasaunders/f4902478bcfa411c77a412c02087bed4
+
+		var categorical = [
+  { "name" : "schemeAccent", "n": 8},
+  { "name" : "schemeDark2", "n": 8},
+  { "name" : "schemePastel2", "n": 8},
+  { "name" : "schemeSet2", "n": 8},
+  { "name" : "schemeSet1", "n": 9},
+  { "name" : "schemePastel1", "n": 9},
+  { "name" : "schemeCategory10", "n" : 10},
+  { "name" : "schemeSet3", "n" : 12 },
+  { "name" : "schemePaired", "n": 12},
+  { "name" : "schemeCategory20", "n" : 20 },
+  { "name" : "schemeCategory20b", "n" : 20},
+  { "name" : "schemeCategory20c", "n" : 20 }
+]
+
+
+		//console.log("test");
+
+		var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+		//draw first histogram
+		var barchart = d3.select("body")
+								.append("svg")
+								.attr("width", w)
+								.attr("height", h);
+
+		//Load in GeoJSON data
+		d3.json("boroughs.geojson", function(json) {
+			//Bind data and create one path per GeoJSON feature
+			var center = d3.geoCentroid(json)
+		 var scale  = 150;
+		 var offset = [w/2, h/2];
+		 var projection = d3.geoMercator().scale(scale).center(center)
+				 .translate(offset);
+
+		 // create the path
+		 var path = d3.geoPath().projection(projection);
+
+		 // using the path determine the bounds of the current map and use
+		 // these to determine better values for the scale and translation
+		 var bounds  = path.bounds(json);
+		 var hscale  = scale*w  / (bounds[1][0] - bounds[0][0]);
+		 var vscale  = scale*h / (bounds[1][1] - bounds[0][1]);
+		 var scale   = (hscale < vscale) ? hscale : vscale;
+		 var offset  = [w - (bounds[0][0] + bounds[1][0])/2,
+											 h - (bounds[0][1] + bounds[1][1])/2];
+
+		/*var color = d3.scaleLinear().domain([1,length])
+      .interpolate(d3.interpolateHcl)
+      .range([d3.rgb("#03A9F4"), d3.rgb('#8BC34A')]);*/
+
+		//var colorScale = d3.scaleOrdinal(d3[categorical[0].name]);
+		var colorScale = d3.schemeCategory20c;
+		//schemeCategory20c
+
+		 // new projection
+		 projection = d3.geoMercator().center(center)
+			 .scale(scale).translate(offset);
+		 path = path.projection(projection);
+
+
+
+		 // add a rectangle to see the bound of the svg
+		 svg.append("rect").attr('width', w).attr('height', h)
+			 .style('stroke', 'black').style('fill', 'none');
+
+		 svg.selectAll("path").data(json.features).enter().append("path")
+			 .attr("d", path)
+			 /*.style("fill", function(d,i) {
+				 console.log(colorScale[i]);
+				 return colorScale[i+8];
+			 })*/
+			 .style("fill", "#4078c0")
+			 .style("fill-opacity", "0.2")
+			 .style("stroke-width", "1")
+			 .style("stroke", "grey");
+
+			 	d3.csv("all_murders2006_2016.csv", function(data) {
+					var circles = svg.selectAll("circle")
+														.data(data)
+														.enter()
+														.append("circle")
+														.attr("cx", function(d) {
+														return projection([d.lon, d.lat])[0];
+														})
+														.attr("cy", function(d) {
+														return projection([d.lon, d.lat])[1];
+														})
+														.attr("r", 3)
+														.style("fill", "#E91E63")
+														.style("opacity", 0.5);
+														//.attr("class", "non_brushed"); //for brushing
+														/*.style("fill", "yellow")
+														.style("stroke", "gray")
+														.style("stroke-width", 0.25)
+														.style("opacity", 0.75)*/
+
+														circles.append("title") //Simple tooltip
+														.text(function(d) {
+														return "Date: " + d.date + " hours: " + d.hours;
+														});
+					//console.log(data);
+
+					//Function for converting CSV values from strings to Dates and numbers
+					var rowConverter = function(d) {
+					return {
+					Date: parseTime(d.date)
+					//Amount: parseInt(d.Amount)
+					};
+					}
+
+					var murdersByBoro = d3.nest()
+											  			.key(function(d) { return d.boro; })
+											  			.entries(data);
+					//console.log(murdersByBoro);
+
+					//count murders by date
+					var murderCount = d3.nest()
+  						.key(function(d) { return d.date; })
+  						.rollup(function(v) { return v.length; })
+  						.entries(data);
+
+					//console.log(JSON.stringify(murderCount));
+
+					//For converting strings to Dates
+					var parseTime = d3.timeParse("%m/%d/%Y");
+
+					//console.log(parseTime("01/14/2016"));
+
+					//console.log(murderCount[1].key);
+					//console.log(parseTime(murderCount[1].key));
+
+
+					xScale = d3.scaleTime()
+									.domain([
+											d3.min(murderCount, function(d) { return parseTime(d.key); }),
+											d3.max(murderCount, function(d) { return parseTime(d.key); })
+									])
+									.range([padding, w - padding]);
+
+					yScale = d3.scaleLinear()
+									 .domain([0,
+										d3.max(murderCount, function(d) { return parseInt(d.value); })
+									])
+									 .range([h-padding, 0]);
+
+									 //Define axes
+									xAxis = d3.axisBottom()
+												 .scale(xScale);
+
+									//Define Y axis
+									yAxis = d3.axisLeft()
+												 .scale(yScale);
+
+				 //Create bars
+					var rects = barchart.selectAll("rect")
+						 .data(murderCount)
+						 .enter()
+						 .append("rect")
+						 .attr("x", function(d) {
+								return xScale(parseTime(d.key));
+						 })
+						 .attr("y", function(d) {
+							// console.log("dcount: " + d.count + ": y: " +  yScale(d.count));
+								return yScale(parseInt(d.value));
+						 })
+						 .attr("class", "non_brushed")
+						 .attr("width", w/(murderCount.length - 1) )
+						 .attr("height", function(d) {
+							// console.log("dcount: " + d.count + ": height: " + (h-yScale(d.count)));
+								return h - yScale(parseInt(d.value))-padding;
+						 })
+						 .attr("fill", function(d) {
+							return "rgb(0, 0, " + Math.round(parseInt(d.value) * 10) + ")";
+						 });
+
+					barchart.append("g")
+		 					 .attr("class", "x axis") //Assign "axis" class
+		 					 .attr("transform", "translate(0," + (h - padding) + ")") //move axis to the bottom
+		 					 .call(xAxis);
+
+		 					 //Create Y axis
+		 			 barchart.append("g")
+		 			 .attr("class", "y axis")
+		 			 .attr("transform", "translate(" + padding + ",0)")
+		 			 .call(yAxis);
+
+					 //adding brush to barchart svg
+
+					 var brush = d3.brush()
+													.on("brush", updateCircles)
+													.on("end", endBrush);
+					 //brush.on("brush", setHistoValues);
+
+						barchart.append("g")
+							 .call(brush);
+
+				function endBrush() {
+					console.log("end brush");
+				}
+
+				function updateCircles() {
+					console.log("updateCircles");
+					if (d3.event.selection != null) {
+
+							// revert circles to initial style
+							rects.attr("class", "non_brushed");
+
+							var brush_coords = d3.brushSelection(this);
+							//console.log(brush_coords);
+
+							var newrects = rects.filter(function (){
+
+												 var x = d3.select(this).attr("x"),
+														 y = d3.select(this).attr("y");
+
+												 //console.log(isBrushed(brush_coords, x, y));
+												 return isBrushed(brush_coords, x, y);
+										 })
+										 .attr("class", "brushed");
+							//console.log(newrects);
+
+							//get all brushed elements
+							var d_brushed =  d3.selectAll(".brushed").data();
+							//console.log(d_brushed);
+
+							//really update circles now
+							reallyUpdateCircles(d_brushed);
+
+
+					}
+				}//end updateCircles
+
+				function reallyUpdateCircles(d_brushed) {
+					//revert circles style
+					circles.style("display", "none");
+					//check if newrects d.key equals circles date
+					for (var i = 0; i < d_brushed.length; i++) {
+						circles.filter(function(d) {
+							//console.log(d.date, d_brushed[i].key);
+							return d.date == d_brushed[i].key })
+						.style("display", "inherit")
+						}
+				}
+
+				function isBrushed(brush_coords, x, y) {
+
+				//	console.log("x0" + x0);
+
+					 var x0 = brush_coords[0][0],
+							 x1 = brush_coords[1][0];
+							 //y0 = brush_coords[0][1],
+							 //y1 = brush_coords[1][1];
+					//return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
+					return x0 <= x && x <= x1
+			}//end function isBrushed
+
+				});//end load csv
+		});//end load Json
+
+
+
+	 /*d3.csv("allmurderhours.csv", function(allhours) {
+		 var selectedData = getHistogram(allhours);
+	 });*/
+
+		</script>
+	</body>
+</html>

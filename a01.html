@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Assignment 1</title>
+		<script type="text/javascript" src="d3.js"></script>
+		<style type="text/css">
+      span {
+        margin-right: 5%;
+        font-weight: 600;
+      }
+
+			p {
+			  font: 20px sans-serif;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<h2>Assignment 1 - Social Data Analysis 2018 </h2>
+		<p>Student: Agzam Idrissov </p>
+
+		<p>This is a reproduction of </p><a href="http://iquantny.tumblr.com/post/129373499164/this-is-quantifiably-the-best-month-to-go-to-the"> http://iquantny.tumblr.com/post/129373499164/this-is-quantifiably-the-best-month-to-go-to-the</a>
+
+    <h2>This is Quantifiably the Best Month to go to the Farmers Market</h2>
+    <p>As part of a homework assignment, I ask my students at Pratt to go out and chart something of interest to them, and Katherine Savarese came back with a simple chart about farmers markets that I loved- it inspired this post.
+You probably know that farmers markets are a staple across all five boroughs of New York City, but September happens to be a very special month. Why is that?  Well, it turns out September is the month with the most unique types of fresh produce- forty three to be exact.
+To show the current offerings, we charted how many types of fruits and vegetables are available by month, and showed if they were fresh or from storage. </p>
+
+<span class = "fresh_fruit" style="color:green">Fresh Fruit</span>
+<span class = "fresh_vegetable" style="color:olive">Fresh Vegetable</span>
+<span class = "storage_fruit" style="color:blue">Storage Fruit</span>
+<span class = "storage_vegetable" style="color:orange">Storage Vegetable</span>
+<br/>
+
+    <script type="text/javascript">
+
+		//code based on exercises from Interactive Data Visualization for the Web book by Scott Murray
+
+    d3.csv("week3.csv", function(error, data) {
+      if (error) { //If error is not null, something went wrong.
+        console.log(error); //Log the error.
+    } else { //If no error, the file loaded correctly. Yay!
+        dataset = data;
+        //dummy data
+        //dataset = [1,4,7,8,15]
+        prepareDataset();
+      }
+    });
+
+    //global array selection
+    var selected = [];
+
+    var first = true;
+
+    var w = 600;
+    var h = 400;
+    var barPadding = 2;
+    var padding = 40;
+
+    var monthsArray = ["Jan","Feb","Mar","Apr", "May", "Jun", "Jul","Aug","Sep","Oct", "Nov", "Dec"];
+
+    var formSubselection = function(counter) {
+      selected = [];
+      for (i = 0; i < dataset.length; i++) {
+        if (dataset[i]["Index"] == counter)
+          selected.push(dataset[i]);//push the whole record
+      }
+    }
+
+    var prepareDataset = function() {
+
+      //takes an index and creates global subselecton array
+      //draw initial graph
+      formSubselection(0);
+      console.log("generateNewVis is called");
+      //Create SVG element
+      var svg = d3.select("body")
+                  .append("svg")
+                  .attr("width", w)
+                  .attr("height", h);
+
+      var monthsNumArray = [];
+      for (i=0; i<selected.length; i++) {
+          monthsNumArray.push((i+1) * (w - padding)/selected.length);
+      }
+      //console.log(monthsNumArray);
+
+      var xScale = d3.scaleOrdinal()
+                      .range(monthsNumArray);
+
+      var yScale = d3.scaleLinear()
+                     .domain([0, d3.max(selected, function(d) {
+                       //console.log("max = " + d["Count"]);
+                        return +d["Count"] })])
+                     .range([h-padding, padding]);
+
+      console.log("max = " + d3.max(selected, function(d) { return +d["Count"]; } ));
+
+      var xAxis = d3.axisBottom(xScale);
+
+      //Define Y axis
+      var yAxis = d3.axisLeft()
+                   .scale(yScale);
+
+    svg.selectAll("rect")
+        .data(selected)
+        .enter()
+        .append("rect")
+        .attr("x", function(d, i) {
+            //return i * (w / selected.length) + padding;
+            //console.log(d["Month"]);
+            //console.log(xScale(d["Month"]));
+            return xScale(d["Month"]);
+        })
+        .attr("y", function(d) {
+            //console.log(selected);
+            //console.log("h" + h + "- yScale " + yScale(d["Count"]) + " while dcount is " + d["Count"]);
+            return yScale(d["Count"]); //
+        })
+        .attr("width", (w-padding)/selected.length - barPadding)
+        .attr("height", function(d) {
+            //console.log("yScale is " + yScale(d["Count"]));
+            return h - yScale(d["Count"]) - padding;
+        })
+        .attr("fill", function(d) {
+            return pickColor(+d["Index"]);
+    });
+
+    svg.selectAll("text")
+        .data(selected)
+        .enter()
+        .append("text")
+        .text(function(d) {
+            console.log(d["Count"]);
+            return d["Count"];
+        })
+        .attr("x", function(d, i) {
+            return xScale(d["Month"]) + (w-padding) / selected.length / 2;
+        })
+        .attr("y", function(d) {
+            return yScale(d["Count"]) - 14;
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "11px")
+        .attr("fill", "red");
+
+    svg.append("g")
+       .attr("class", "y axis")
+       .attr("transform", "translate(" + padding + ",0)")
+       .call(yAxis);
+
+    svg.append("g")
+       .attr("class", "x axis") //Assign "axis" class
+       .attr("transform", "translate(0," + (h - padding) + ")")
+       .call(xAxis);
+
+       //need rewrite - iterate through class
+      d3.select(".fresh_fruit")
+        .on("click", function() {
+          formSubselection(0);
+          updateData();
+        });
+
+      d3.select(".fresh_vegetable")
+        .on("click", function() {
+          formSubselection(1);
+          updateData();
+      });
+      d3.select(".storage_fruit")
+        .on("click", function() {
+          formSubselection(2);
+          updateData();
+      });
+      d3.select(".storage_vegetable")
+        .on("click", function() {
+          formSubselection(3);
+          updateData();
+      });
+    }
+
+    function updateData() {
+      console.log("Rescaling data range");
+
+      var monthsNumArray = [];
+      for (i=0; i<selected.length; i++) {
+          monthsNumArray.push((i+1) * (w - padding)/selected.length);
+      }
+      //console.log(monthsNumArray);
+
+      //console.log("Rescaling data range");
+      var xScale = d3.scaleOrdinal()
+                      .range(monthsNumArray);
+
+      console.log("max = " + d3.max(selected, function(d) { return +d["Count"]; } ));
+
+      var yScale = d3.scaleLinear()
+                     .domain([0, d3.max(selected, function(d) {
+                       //don't forget to put + to convert string to number
+                      return +d["Count"] })])
+                     .range([h-padding, padding]);
+
+      // Select the section we want to apply our changes to
+      var svg = d3.select("svg");
+
+    //  svg.selectAll("text").remove();
+
+      //redraw labels
+      svg.selectAll("text")
+          .data(selected)
+          .text(function(d) {
+              console.log(d["Count"]);
+              return d["Count"];
+          })
+          .attr("x", function(d, i) {
+              return xScale(d["Month"]) + (w-padding) / selected.length / 2; //place label at the center of each bar
+          })
+          .attr("y", function(d) {
+              return yScale(d["Count"]) - 14;
+          });
+
+
+     //redraw bars
+     var rect = d3.selectAll("rect")
+         .data(selected)
+         .transition()
+         .attr("x", function(d, i) {
+             return xScale(d["Month"]);
+         })
+         .attr("y", function(d) {
+             //console.log(selected);
+             //console.log("h" + h + "- yScale " + yScale(d["Count"]) + " while dcount is " + d["Count"]);
+             return yScale(d["Count"]); //
+         })
+         //.attr("width", (w-padding)/selected.length - barPadding)
+         .attr("height", function(d) {
+             //console.log("yScale is " + yScale(d["Count"]));
+             return h - yScale(d["Count"]) - padding;
+         })
+         .attr("fill", function(d) {
+             return pickColor(+d["Index"]);
+         });
+
+    //update only Y axis
+     var yAxis = d3.axisLeft()
+                      .scale(yScale);
+
+     svg.selectAll(".y.axis")
+                  .transition()
+                  .duration(750)
+                  .call(yAxis);
+    }//end updateData
+
+    var pickColor = function (index){
+      switch(index) {
+        case 0:
+            return "green"
+            break;
+        case 1:
+            return "olive"
+            break;
+        case 2:
+            return "blue"
+            break;
+        case 3:
+            return "orange"
+            break;
+        default:
+            return "green"
+      }//end switch
+    }// end pickColor
+
+		</script>
+	</body>
+</html>
